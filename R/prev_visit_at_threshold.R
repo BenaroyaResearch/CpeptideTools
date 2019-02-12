@@ -1,11 +1,11 @@
 #' Determine which visits for any subject occur after C-peptide AUC has reached the detection limit
 #'
-#' This function determines which, if any, visits for any subject occur after that subject's C-peptide AUC has
+#' This function determines which visits (if any) for each subject occur after that subject's C-peptide AUC has
 #' reached the detection limit. For AUC values, this means that the C-peptide levels for each timepoint are at the
-#' detection limit; the AUC detection limit should be calculated as such. As input, it takes a data frame of
+#' detection limit; the AUC detection limit should be calculated as such. As input, the function takes a data frame of
 #' C-peptide values, with subject identifiers and a date or visit column on which to sort the visits. Note that
 #' visits will be sorted blindly, so character visit names (e.g. Day 1, Week 1, Month 2) should be used with EXTREME
-#' CAUTION!
+#' CAUTION! Numeric, date, or factor visit values are strongly preferred.
 #' @param cpeptide_auc_data data frame containing the C-peptide data. Should contain a unique subject identifer, a column for sorting visits, and the C-peptide AUC data. Each row should be a single visit.
 #' @param threshold numeric, the threshold C-peptide AUC value. Values at or below this level will be treated as sub-threshold.
 #' @param identifier_column character or numeric, the column containing the subject identifiers. By default it uses "subject".

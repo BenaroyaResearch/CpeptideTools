@@ -33,7 +33,7 @@ This function uses linear models to estimate the rate of C-peptide AUC change ov
 There are three options for how to fit models, set using the \code{model_type} argument:
 "independent" fits a separate, independent intercept and slope for each value of
 \code{identifier_column}; "random_effect" fits an individual-level random effect for both the
-intercept and the slpope; "grouped_random_effect" fits an individual-level random effect for
+intercept and the slope; "grouped_random_effect" fits an individual-level random effect for
 the intercept, a group-level fixed effect for each unique value of \code{group_column}, and
 an individual-level random effect around the group means.
 }

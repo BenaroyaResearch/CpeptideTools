@@ -26,10 +26,10 @@ prev_visit_at_threshold(
 a logical vector, with each element corresponding to a row of the input data frame; contains TRUE if the subject already had C-peptide AUC at or below the threshold at prior visits, and FALSE otherwise.
 }
 \description{
-This function determines which, if any, visits for any subject occur after that subject's C-peptide AUC has
+This function determines which visits (if any) for each subject occur after that subject's C-peptide AUC has
 reached the detection limit. For AUC values, this means that the C-peptide levels for each timepoint are at the
-detection limit; the AUC detection limit should be calculated as such. As input, it takes a data frame of
+detection limit; the AUC detection limit should be calculated as such. As input, the function takes a data frame of
 C-peptide values, with subject identifiers and a date or visit column on which to sort the visits. Note that
 visits will be sorted blindly, so character visit names (e.g. Day 1, Week 1, Month 2) should be used with EXTREME
-CAUTION!
+CAUTION! Numeric, date, or factor visit values are strongly preferred.
 }
