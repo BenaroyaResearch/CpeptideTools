@@ -13,12 +13,11 @@
 #' @param auc_column character or numeric, the column containing the C-peptide AUC values. By default it uses "auc".
 #' @export
 #' @return a logical vector, with each element corresponding to a row of the input data frame; contains TRUE if the subject already had C-peptide AUC at or below the threshold at prior visits, and FALSE otherwise.
-#' @usage \code{
+#' @usage
 #' prev_visit_at_threshold(
 #'   cpeptide_auc_data, threshold,
 #'   identifier_column="subject", sort_column="visit",
-#'   auc_column="auc"
-#'   )}
+#'   auc_column="auc")
 prev_visit_at_threshold <-
   function(cpeptide_auc_data, threshold,
            identifier_column="subject", sort_column="visit",

@@ -4,12 +4,10 @@
 \alias{prev_visit_at_threshold}
 \title{Determine which visits for any subject occur after C-peptide AUC has reached the detection limit}
 \usage{
-\code{
 prev_visit_at_threshold(
   cpeptide_auc_data, threshold,
   identifier_column="subject", sort_column="visit",
-  auc_column="auc"
-  )}
+  auc_column="auc")
 }
 \arguments{
 \item{cpeptide_auc_data}{data frame containing the C-peptide data. Should contain a unique subject identifer, a column for sorting visits, and the C-peptide AUC data. Each row should be a single visit.}

@@ -15,13 +15,12 @@
 #' @param auc_timeframe character, either "2-hour" or "4-hour". Determines whether the AUC is calculated over 2 hours or 4.  If "4-hour" is selected, any 2-hour MMTTs will be dropped. Defaults to "2-hour".
 #' @export
 #' @return a vector containing the AUC values, with NA where it could not be calculated
-#' @usage \code{
+#' @usage
 #' calc_AUC(
 #'   input_data, input_format="wide",
 #'   pep_colname="pep", timepoint_colname="timepoint", 
 #'   initial_timepoint="zero", treat_missing="drop",
-#'   auc_timeframe="2-hour"
-#'   )}
+#'   auc_timeframe="2-hour")
 calc_AUC <-
   function(input_data, input_format="wide",
            pep_colname="pep", timepoint_colname="timepoint",
@@ -35,7 +34,7 @@ calc_AUC <-
     if (input_format=="long") {
       input_data <-
         input_data %>%
-        spread(key=!!timepoint_colname, value=!!pep_colname, sep="") %>%
+        tidyr::spread(key=!!timepoint_colname, value=!!pep_colname, sep="") %>%
         setNames(str_replace(names(.), paste0(timepoint_colname, "(?=([_.-]?[0-9]+$))"), pep_colname))
     }
     
@@ -47,11 +46,12 @@ calc_AUC <-
           grep(pattern=paste0(pep_colname, "[_.-]?[0-9]+$"), x=., value=TRUE) %>%
           as.character(),
         stringsAsFactors=FALSE) %>%
-      mutate(
-        timepoint_val=(timepoint_col %>%
-                 str_extract("[_.-]?[0-9]+$") %>%
-                 str_replace("[_.-]", "-") %>%
-                 as.numeric())) %>%
+      dplyr::mutate(
+        timepoint_val=
+          (timepoint_col %>%
+             str_extract("[_.-]?[0-9]+$") %>%
+             str_replace("[_.-]", "-") %>%
+             as.numeric())) %>%
       dplyr::arrange(timepoint_val)
     
     # if 2-hour MMTT, drop all timepoints after 120

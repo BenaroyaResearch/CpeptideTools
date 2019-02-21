@@ -15,13 +15,12 @@
 #' @param group_column character or numeric, the column containing the subject grouping. Used only if \code{model_type} is set to "grouped_random_effect"
 #' @export
 #' @return a list containing, for each value of \code{model_type}, an element with the model fit(s) (as $model) and and a data frame with the extracted slopes and intercepts for each subject (as $rates). Slopes are given in the units of \code{auc_column} / unit of \code{time_column}.
-#' @usage \code{
+#' @usage
 #' calc_Cpeptide_rates(
 #'   cpeptide_auc_data, model_type=c("independent", "random_effect"),
 #'   identifier_column="subject", time_column="cpeptide_study_day",
 #'   auc_column="auc",
-#'   group_column
-#'   )}
+#'   group_column)
 calc_Cpeptide_rates <-
   function(cpeptide_auc_data, model_type=c("independent", "random_effect"),
            identifier_column="subject", time_column="cpeptide_study_day",

@@ -4,13 +4,11 @@
 \alias{calc_Cpeptide_rates}
 \title{Estimate rate of C-peptide change over time, by subject (with options!)}
 \usage{
-\code{
 calc_Cpeptide_rates(
   cpeptide_auc_data, model_type=c("independent", "random_effect"),
   identifier_column="subject", time_column="cpeptide_study_day",
   auc_column="auc",
-  group_column
-  )}
+  group_column)
 }
 \arguments{
 \item{cpeptide_auc_data}{data frame containing the C-peptide data. Should contain a unique subject identifer, a numeric column for the timing of visits, and C-peptide AUC values. Any non-NA values included in this data frame will be used, so filtering should be done before passing the data to this function.}
