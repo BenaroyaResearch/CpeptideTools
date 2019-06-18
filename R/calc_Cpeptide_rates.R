@@ -15,12 +15,6 @@
 #' @param group_column character or numeric, the column containing the subject grouping. Used only if \code{model_type} is set to "grouped_random_effect"
 #' @export
 #' @return a list containing, for each value of \code{model_type}, an element with the model fit(s) (as $model) and and a data frame with the extracted slopes and intercepts for each subject (as $rates). Slopes are given in the units of \code{auc_column} / unit of \code{time_column}.
-#' @usage
-#' calc_Cpeptide_rates(
-#'   cpeptide_auc_data, model_type=c("independent", "random_effect"),
-#'   identifier_column="subject", time_column="cpeptide_study_day",
-#'   auc_column="auc",
-#'   group_column)
 calc_Cpeptide_rates <-
   function(cpeptide_auc_data, model_type=c("independent", "random_effect"),
            identifier_column="subject", time_column="cpeptide_study_day",
@@ -31,7 +25,8 @@ calc_Cpeptide_rates <-
     if (is.numeric(identifier_column)) identifier_column <- colnames(cpeptide_auc_data)[identifier_column]
     if (is.numeric(time_column)) time_column <- colnames(cpeptide_auc_data)[time_column]
     if (is.numeric(auc_column)) auc_column <- colnames(cpeptide_auc_data)[auc_column]
-    if (is.numeric(group_column)) group_column <- colnames(cpeptide_auc_data)[group_column]
+    if (!missing(group_column))
+      if (is.numeric(group_column)) group_column <- colnames(cpeptide_auc_data)[group_column]
     
     # scale time variable for better model fitting
     time_scaled <-
