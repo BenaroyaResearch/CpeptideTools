@@ -127,7 +127,6 @@ calc_Cpeptide_rates <-
                 cpeptide_models_rates[["random_effect"]][["rates"]][i, identifier_column],
                 rownames(coef(cpeptide_models_rates[["random_effect"]][["model"]])[[identifier_column]])),]) == 2) {
             
-            # fix from here down
             cpeptide_models_rates[["random_effect"]][["rates"]][i, "slope"] <-
               coef(cpeptide_models_rates[["random_effect"]][["model"]])[[identifier_column]][
                 match(cpeptide_models_rates[["random_effect"]][["rates"]][i, identifier_column],
@@ -168,7 +167,6 @@ calc_Cpeptide_rates <-
       cpeptide_models_rates[["grouped_random_effect"]][["rates"]][["slope"]] <- as.numeric(NA)
       cpeptide_models_rates[["grouped_random_effect"]][["rates"]][["intercept"]] <- as.numeric(NA)
       
-      # continue fixing from here 
       for (i in 1:nrow(cpeptide_models_rates[["grouped_random_effect"]][["rates"]])) {
         if (cpeptide_models_rates[["grouped_random_effect"]][["rates"]][i, identifier_column] %in%
             rownames(coef(cpeptide_models_rates[["grouped_random_effect"]][["model"]])[[identifier_column]]))
@@ -179,7 +177,6 @@ calc_Cpeptide_rates <-
                 rownames(coef(cpeptide_models_rates[["grouped_random_effect"]][["model"]])[[identifier_column]])),]) == 
             ncol(coef(cpeptide_models_rates[["grouped_random_effect"]][["model"]])[[identifier_column]])) {
             
-            # fix from here down
             cpeptide_models_rates[["grouped_random_effect"]][["rates"]][i, "slope"] <-
               ((coef(cpeptide_models_rates[["grouped_random_effect"]][["model"]])[[identifier_column]][
                 match(cpeptide_models_rates[["grouped_random_effect"]][["rates"]][i, identifier_column],
