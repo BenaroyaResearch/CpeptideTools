@@ -9,7 +9,7 @@
 #' an individual-level random effect around the group means.
 #' @param cpeptide_auc_data data frame containing the C-peptide data. Should contain a unique subject identifer, a numeric column for the timing of visits, and C-peptide AUC values. Any non-NA values included in this data frame will be used, so filtering should be done before passing the data to this function.
 #' @param model_type character, the type(s) of model to fit. Options are "independent", "random_effect", and "grouped_random_effect". "independent" uses a simple fixed-effects model with slopes and intercepts for each subject. "random_effect" uses a mixed-effects model with subject-level random intercepts and slopes. "grouped_random_effect" uses a mixed-effects model like "random_effect", but with group-level fixed effects for the slopes.
-#' @param identifier_column character or numeric, the column containing the subject identifiers. Defaults to "subject".
+#' @param identifier_column character or numeric, the column containing the subject identifiers. Defaults to "subject". If the contents of the specified column are numeric, they are coerced to character class, with a warning.
 #' @param time_column character or numeric, the column with the time variable. Should be numeric and based on a baseline visit, as intercept values only make sense if they are based on a common scale. Default is "cpeptide_study_day".
 #' @param auc_column character or numeric, the column containing the C-peptide AUC values. Data should be transformed to whatever form the model is to be fit to (typically log-transformed). Defaults to "auc".
 #' @param group_column character or numeric, the column containing the subject grouping. Used only if \code{model_type} is set to "grouped_random_effect"
@@ -27,6 +27,15 @@ calc_Cpeptide_rates <-
     if (is.numeric(auc_column)) auc_column <- colnames(cpeptide_auc_data)[auc_column]
     if (!missing(group_column))
       if (is.numeric(group_column)) group_column <- colnames(cpeptide_auc_data)[group_column]
+    
+    # if identifier column is numeric, coerce it to a character vector
+    if (is.numeric(cpeptide_auc_data[[identifier_column]])) {
+      warning("Column `identifier_column` of the input data frame, which was specified ",
+              "for subject identifiers, is numeric. ",
+              "Coercing identifiers to character strings before fitting the models.")
+      cpeptide_auc_data[[identifier_column]] <- as.character(cpeptide_auc_data[[identifier_column]])
+    }
+    
     
     # scale time variable for better model fitting
     time_scaled <-

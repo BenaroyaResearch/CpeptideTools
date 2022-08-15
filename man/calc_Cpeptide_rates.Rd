@@ -4,16 +4,21 @@
 \alias{calc_Cpeptide_rates}
 \title{Estimate rate of C-peptide change over time, by subject (with options!)}
 \usage{
-calc_Cpeptide_rates(cpeptide_auc_data, model_type = c("independent",
-  "random_effect"), identifier_column = "subject",
-  time_column = "cpeptide_study_day", auc_column = "auc", group_column)
+calc_Cpeptide_rates(
+  cpeptide_auc_data,
+  model_type = c("independent", "random_effect"),
+  identifier_column = "subject",
+  time_column = "cpeptide_study_day",
+  auc_column = "auc",
+  group_column
+)
 }
 \arguments{
 \item{cpeptide_auc_data}{data frame containing the C-peptide data. Should contain a unique subject identifer, a numeric column for the timing of visits, and C-peptide AUC values. Any non-NA values included in this data frame will be used, so filtering should be done before passing the data to this function.}
 
 \item{model_type}{character, the type(s) of model to fit. Options are "independent", "random_effect", and "grouped_random_effect". "independent" uses a simple fixed-effects model with slopes and intercepts for each subject. "random_effect" uses a mixed-effects model with subject-level random intercepts and slopes. "grouped_random_effect" uses a mixed-effects model like "random_effect", but with group-level fixed effects for the slopes.}
 
-\item{identifier_column}{character or numeric, the column containing the subject identifiers. Defaults to "subject".}
+\item{identifier_column}{character or numeric, the column containing the subject identifiers. Defaults to "subject". If the contents of the specified column are numeric, they are coerced to character class, with a warning.}
 
 \item{time_column}{character or numeric, the column with the time variable. Should be numeric and based on a baseline visit, as intercept values only make sense if they are based on a common scale. Default is "cpeptide_study_day".}
 
