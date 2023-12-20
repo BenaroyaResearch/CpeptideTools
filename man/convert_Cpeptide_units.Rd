@@ -5,8 +5,7 @@
 \title{Convert C-peptide values between standard units}
 \usage{
 convert_Cpeptide_units(
-  values, input_units = "nmol_per_l_per_min", output_units = "ng_per_ml",
-  test_minutes = 120)
+  values, input_units, output_units, test_minutes = NULL)
 }
 \arguments{
 \item{values}{numeric vector C-peptide values. If there are issues with values below the detection threshold, those must be resolved before running this function (i.e. values such as "<0.01" are not allowed)}

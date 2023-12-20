@@ -14,14 +14,15 @@
 #' "Cpep_expected = -0.191 + 0.812 * ln(Cpep_baseline + 1) + 0.00638 * Age"
 #' @param input_data data frame containing the C-peptide AUC values from MMTTs and subject ages.
 #' @param timepoint numeric, the number of months at which to calculate the expected C-peptide value. Current implementation only supports 12.
-#' @param cpeptide_baseline_colname character or numeric, the column containing the C-peptide values. Defaults to "aucMean".
-#' @param age_colname character or numeric, the column containing the age values. Defaults to "ageYears".
+#' @param cpeptide_baseline_colname character or numeric, the column containing the C-peptide values. Defaults to "auc_mean".
+#' @param age_colname character or numeric, the column containing the age values. Defaults to "age_years".
 #' @import checkmate
 #' @export
 #' @return a vector containing the expected C-peptide values at the specified timepoint, in ln(nmol/L/min + 1).
 #' @usage
 #' calc_AUC_expected_QR(
-#'   input_data, timepoint = 12, cpeptide_baseline_colname = "aucMean", age_colname = "ageYears")
+#'   input_data, timepoint = 12, 
+#'   cpeptide_baseline_colname = "auc_mean", age_colname = "age_years")
 calc_AUC_expected_QR <-
   function(input_data, timepoint = 12, cpeptide_baseline_colname = "auc_mean", age_colname = "age_years") {
     # check input

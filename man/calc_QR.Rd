@@ -5,19 +5,19 @@
 \title{Calculate the quantitative response (QR) of C-peptide AUC}
 \usage{
 calc_QR(
-  input_data, timepoint = 12, cpeptide_baseline_colname = "aucMeanBaseline",
-  cpeptide_timepoint_colname = "aucMean", age_colname = "ageYears")
+  input_data, timepoint = 12, cpeptide_baseline_colname = "auc_mean_baseline",
+  cpeptide_timepoint_colname = "auc_mean", age_colname = "age_years")
 }
 \arguments{
 \item{input_data}{data frame containing the C-peptide AUC values from MMTTs and subject ages.}
 
 \item{timepoint}{numeric, the number of months at which to calculate the expected C-peptide value. Current implementation only supports 12.}
 
-\item{cpeptide_baseline_colname}{character or numeric, the column containing the C-peptide values. Defaults to "aucMeanBaseline".}
+\item{cpeptide_baseline_colname}{character or numeric, the column containing the C-peptide values. Defaults to "auc_mean_baseline".}
 
-\item{cpeptide_timepoint_colname}{character or numeric, the column containing the C-peptide values. Defaults to "aucMean".}
+\item{cpeptide_timepoint_colname}{character or numeric, the column containing the C-peptide values. Defaults to "auc_mean".}
 
-\item{age_colname}{character or numeric, the column containing the age values. Defaults to "ageYears".}
+\item{age_colname}{character or numeric, the column containing the age values. Defaults to "age_years".}
 }
 \value{
 a vector containing the QR values at the specified timepoint, in ln(nmol/L/min + 1).

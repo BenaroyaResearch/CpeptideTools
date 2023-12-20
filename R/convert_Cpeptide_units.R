@@ -9,12 +9,12 @@
 #' @param output_units character, the desired output units of the C-peptide values. Options are the same as for \code{input_units}. If "_per_min" is included, output values will be means across the time period of the MMTT or OGTT, and the number of minutes must be specified in \code{test_minutes}.
 #' @param test_minutes numeric, the number of minutes for the OGTT or MMTT. Ignored if "_per_min" is not included as part of \code{input_units} or \code{output_units}. If both input and output units use "_per_min", the number of minutes must be the same (you cannot pass two different values for this argument).
 #' @import checkmate
+#' @import stringr
 #' @export
 #' @return a vector containing the C-peptide values, with NA where it could not be calculated
 #' @usage
 #' convert_Cpeptide_units(
-#'   values, input_units = "nmol_per_l_per_min", output_units = "ng_per_ml",
-#'   test_minutes = 120)
+#'   values, input_units, output_units, test_minutes = NULL)
 convert_Cpeptide_units <-
   function(values, input_units, output_units, test_minutes = NULL) {
     # set conversion values, with standard units of ng/ml
@@ -46,10 +46,10 @@ convert_Cpeptide_units <-
     assert(
       check_choice(input_units_quantity, c("ng", "nmol")),
       check_choice(input_units_volume, c("ml", "l")),
-      check_boolean(input_units_per_min),
+      check_logical(input_units_per_min, len = 1),
       check_choice(output_units_quantity, c("ng", "nmol")),
       check_choice(output_units_volume, c("ml", "l")),
-      check_boolean(output_units_per_min)
+      check_logical(output_units_per_min, len = 1)
       )
 
     # convert values

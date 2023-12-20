@@ -15,17 +15,19 @@
 #' @param identifier_column character or numeric, the column containing the subject identifiers. By default it uses "subject".
 #' @param sort_column character or numeric, the column on which each subject's visits should be sorted. This should be either numeric, date, or character that will be sorted consistently by dplyr::arrange(). If set to NULL, rows for each subject will be assumed to be in the desired order. By default it uses "visit".
 #' @param auc_column character or numeric, the column containing the C-peptide AUC values. By default it uses "auc".
+#' @import dplyr
+#' @import rlang
 #' @export
 #' @return a logical vector, with each element corresponding to a row of the input data frame; contains TRUE if the subject already had C-peptide AUC at or below the threshold at prior visits, and FALSE otherwise.
 #' @usage
 #' prev_visit_at_threshold(
 #'   cpeptide_auc_data, threshold,
-#'   identifier_column="subject", sort_column="visit",
-#'   auc_column="auc")
+#'   identifier_column = "subject", sort_column = "visit",
+#'   auc_column = "auc")
 prev_visit_at_threshold <-
   function(cpeptide_auc_data, threshold,
-           identifier_column="subject", sort_column="visit",
-           auc_column="auc") {
+           identifier_column = "subject", sort_column = "visit",
+           auc_column = "auc") {
     
     # ensure character column names (necessary for dplyr functions), and that they are present in data
     if (is.numeric(identifier_column)) {
@@ -52,25 +54,24 @@ prev_visit_at_threshold <-
     cpeptide_auc_data$orig_row <- 1:nrow(cpeptide_auc_data)
     
     if (!is.null(sort_column))
-      cpeptide_auc_data <- dplyr::arrange(cpeptide_auc_data, !! rlang::sym(sort_column))
+      cpeptide_auc_data <- dplyr::arrange(cpeptide_auc_data, !!rlang::sym(sort_column))
 
     cpeptide_auc_data$prev_visit_at_threshold <- FALSE
     
     for (id.tmp in unique(cpeptide_auc_data[[identifier_column]])) {
-      rows.tmp <- which(cpeptide_auc_data[[identifier_column]]==id.tmp)
+      rows.tmp <- which(cpeptide_auc_data[[identifier_column]] == id.tmp)
       if (length(rows.tmp) > 1) {
         for (i in 2:length(rows.tmp)) {
           cpeptide_auc_data$prev_visit_at_threshold[rows.tmp[i]] <-
-            cpeptide_auc_data$prev_visit_at_threshold[rows.tmp[i-1]] |
-            (!is.na(cpeptide_auc_data[rows.tmp[i-1], auc_column, drop=TRUE]) &
-               (cpeptide_auc_data[rows.tmp[i-1], auc_column, drop=TRUE] <= threshold))
+            cpeptide_auc_data$prev_visit_at_threshold[rows.tmp[i - 1]] |
+            (!is.na(cpeptide_auc_data[rows.tmp[i - 1], auc_column, drop = TRUE]) &
+               (cpeptide_auc_data[rows.tmp[i - 1], auc_column, drop = TRUE] <= threshold))
         }
       }
     }
     
     cpeptide_auc_data <-
-      cpeptide_auc_data %>%
-      dplyr::arrange(orig_row)
+      dplyr::arrange(cpeptide_auc_data, orig_row)
 
     cpeptide_auc_data$prev_visit_at_threshold
   }

@@ -5,10 +5,10 @@
 \title{Calculate the trapezoidal area under the curve for a stimulated C-peptide assay}
 \usage{
 calc_AUC(
-  input_data, input_format="wide",
-  pep_colname="pep", timepoint_colname="timepoint", 
-  initial_timepoint="zero", treat_missing="drop",
-  auc_timeframe="2-hour")
+  input_data, input_format = "wide",
+  pep_colname = "pep", timepoint_colname = "timepoint", 
+  initial_timepoint = "zero", treat_missing = "drop",
+  auc_timeframe = "2-hour")
 }
 \arguments{
 \item{input_data}{data frame containing the C-peptide data from MMTTs or stimulated insulin data from OGTTs. Should contain a unique visit/test identifer and the C-peptide level at each timepoint. If there are issues with values below the detection threshold, those must be resolved before running this function (i.e. values such as "<0.01" are not allowed)}

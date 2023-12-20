@@ -13,12 +13,14 @@
 #' @param time_column character or numeric, the column with the time variable. Should be numeric and based on a baseline visit, as intercept values only make sense if they are based on a common scale. Default is "cpeptide_study_day".
 #' @param auc_column character or numeric, the column containing the C-peptide AUC values. Data should be transformed to whatever form the model is to be fit to (typically log-transformed). Defaults to "auc".
 #' @param group_column character or numeric, the column containing the subject grouping. Used only if \code{model_type} is set to "grouped_random_effect"
+#' @import stats
+#' @import lme4
 #' @export
 #' @return a list containing, for each value of \code{model_type}, an element with the model fit(s) (as $model) and and a data frame with the extracted slopes and intercepts for each subject (as $rates). Slopes are given in the units of \code{auc_column} / unit of \code{time_column}.
 calc_Cpeptide_rates <-
-  function(cpeptide_auc_data, model_type=c("independent", "random_effect"),
-           identifier_column="subject", time_column="cpeptide_study_day",
-           auc_column="auc",
+  function(cpeptide_auc_data, model_type = c("independent", "random_effect"),
+           identifier_column = "subject", time_column = "cpeptide_study_day",
+           auc_column = "auc",
            group_column) {
     
     # ensure character column names (necessary for dplyr functions)
@@ -39,8 +41,8 @@ calc_Cpeptide_rates <-
     
     # scale time variable for better model fitting
     time_scaled <-
-      scale(cpeptide_auc_data[[time_column]], center=FALSE,
-            scale=sd(cpeptide_auc_data[[time_column]], na.rm=TRUE))
+      scale(cpeptide_auc_data[[time_column]], center = FALSE,
+            scale = sd(cpeptide_auc_data[[time_column]], na.rm = TRUE))
     cpeptide_auc_data[[time_column]] <-
       as.vector(time_scaled)
     time.sd <- attr(time_scaled, "scaled:scale")
@@ -62,13 +64,13 @@ calc_Cpeptide_rates <-
             paste(paste0(auc_column, " ~ 0"),
                   identifier_column,
                   paste0(time_column, ":", identifier_column),
-                  sep=" + ")),
-          data=cpeptide_auc_data)
+                  sep = " + ")),
+          data = cpeptide_auc_data)
       cpeptide_models_rates[["independent"]][["rates"]] <-
         data.frame(
           unique(cpeptide_auc_data[[identifier_column]]),
-          slope=as.numeric(NA),
-          intercept=as.numeric(NA),
+          slope = as.numeric(NA),
+          intercept = as.numeric(NA),
           stringsAsFactors = FALSE)
       colnames(cpeptide_models_rates[["independent"]][["rates"]])[1] <-
         identifier_column
@@ -100,20 +102,20 @@ calc_Cpeptide_rates <-
       cpeptide_models_rates[["random_effect"]] <- list()
       cpeptide_models_rates[["random_effect"]][["model"]] <-
         lme4::lmer(
-          formula=
+          formula =
             formula(
               paste(paste0(auc_column, " ~ 1"),
                     paste0("(1|", identifier_column, ")"),
                     time_column,
                     paste0("(", time_column, "-1|", identifier_column, ")"),
-                    sep=" + ")),
-          data=cpeptide_auc_data)
+                    sep = " + ")),
+          data = cpeptide_auc_data)
       
       cpeptide_models_rates[["random_effect"]][["rates"]] <-
         data.frame(
           unique(cpeptide_auc_data[[identifier_column]]),
-          slope=as.numeric(NA),
-          intercept=as.numeric(NA),
+          slope = as.numeric(NA),
+          intercept = as.numeric(NA),
           stringsAsFactors = FALSE)
       colnames(cpeptide_models_rates[["random_effect"]][["rates"]])[1] <-
         identifier_column
@@ -145,15 +147,15 @@ calc_Cpeptide_rates <-
       cpeptide_models_rates[["grouped_random_effect"]] <- list()
       cpeptide_models_rates[["grouped_random_effect"]][["model"]] <-
         lme4::lmer(
-          formula=
+          formula =
             formula(
               paste(paste0(auc_column, " ~ 1"),
                     paste0("(1|", identifier_column, ")"),
                     time_column,
                     paste0(time_column, ":", group_column),
                     paste0("(", time_column, "-1|", identifier_column, ")"),
-                    sep=" + ")),
-          data=cpeptide_auc_data)
+                    sep = " + ")),
+          data = cpeptide_auc_data)
       cpeptide_models_rates[["grouped_random_effect"]][["rates"]] <-
         data.frame(
           unique(cpeptide_auc_data[[identifier_column]]),
@@ -191,7 +193,7 @@ calc_Cpeptide_rates <-
                      (str_replace_all(
                        grep(paste0(time_column, ":", group_column),
                             colnames(coef(cpeptide_models_rates[["grouped_random_effect"]][["model"]])[[identifier_column]]),
-                            value=TRUE),
+                            value = TRUE),
                        paste0(time_column, ":", group_column), "") %in%
                         cpeptide_models_rates[["grouped_random_effect"]][["rates"]][i, group_column])))) / time.sd
             
@@ -203,5 +205,5 @@ calc_Cpeptide_rates <-
           }
       }
     }
-    cpeptide_models_rates
+    return(cpeptide_models_rates)
   }
