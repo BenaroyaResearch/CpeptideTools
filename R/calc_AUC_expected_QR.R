@@ -9,7 +9,7 @@
 #' NOTE: Values for AUC must be in the standardized units used in the QR model,
 #' specifically in units of nmol per L per minute from a 120-minute MMTT
 #' (not log-transformed). Values for age must be in years.
-#' 
+#'
 #' The equation used is:
 #' "Cpep_expected = -0.191 + 0.812 * ln(Cpep_baseline + 1) + 0.00638 * Age"
 #' @param input_data data frame containing the C-peptide AUC values from MMTTs and subject ages.
@@ -21,28 +21,27 @@
 #' @return a vector containing the expected C-peptide values at the specified timepoint, in ln(nmol/L/min + 1).
 #' @usage
 #' calc_AUC_expected_QR(
-#'   input_data, timepoint = 12, 
+#'   input_data, timepoint = 12,
 #'   cpeptide_baseline_colname = "auc_mean", age_colname = "age_years")
 calc_AUC_expected_QR <-
-  function(input_data, timepoint = 12, cpeptide_baseline_colname = "auc_mean", age_colname = "age_years") {
+  function(
+    input_data,
+    timepoint = 12,
+    cpeptide_baseline_colname = "auc_mean",
+    age_colname = "age_years"
+  ) {
     # check input
     assert_data_frame(input_data)
     assert_number(timepoint)
-    assert(
-      check_string(cpeptide_baseline_colname),
-      check_string(age_colname),
-      combine = "and")
-    assert(
-      ifelse(cpeptide_baseline_colname %in% colnames(input_data),
-        TRUE,
-        "cpeptide_baseline_colname not found in input_data"),
-      ifelse(age_colname %in% colnames(input_data),
-        TRUE,
-        "age_colname not found in input_data"),
-      combine = "and")
+    assert_string(cpeptide_baseline_colname)
+    assert_string(age_colname)
+    assert_names(
+      colnames(input_data),
+      must.include = c(cpeptide_baseline_colname, age_colname)
+    )
     assert_numeric(input_data[[cpeptide_baseline_colname]])
     assert_numeric(input_data[[age_colname]])
-    
+
     # calculate expected C-peptide values
     if (timepoint == 12) {
       cpep_expected <-

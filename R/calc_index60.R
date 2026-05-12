@@ -9,7 +9,7 @@
 #' OGTT, and 60-minute glucose levels from OGTT.
 #' NOTE: Values for glucose and C-peptide must be in the standardized units used
 #' in Index60, specifically ng/mL for C-peptide and mg/dL for glucose.
-#' 
+#'
 #' The equation used is:
 #' "Index60 = 0.3695 * log (fasting C-peptide) + 0.0165 * (60-minute glucose) - 0.3644 * (60-minute C-peptide)"
 #' @param input_data data frame containing the C-peptide and glucose values
@@ -26,10 +26,12 @@
 #'   cpeptide_60min_colname = "pep60",
 #'   glucose_60min_colname = "glu60")
 calc_index60 <-
-  function(input_data,
-           cpeptide_fasting_colname = "pep0",
-           cpeptide_60min_colname = "pep60",
-           glucose_60min_colname = "glu60") {
+  function(
+    input_data,
+    cpeptide_fasting_colname = "pep0",
+    cpeptide_60min_colname = "pep60",
+    glucose_60min_colname = "glu60"
+  ) {
     # check input
     assert_data_frame(input_data)
     if (is.numeric(cpeptide_fasting_colname)) {
@@ -41,31 +43,27 @@ calc_index60 <-
     if (is.numeric(glucose_60min_colname)) {
       glucose_60min_colname <- colnames(input_data)[glucose_60min_colname]
     }
-    assert(
-      check_string(cpeptide_fasting_colname),
-      check_string(cpeptide_60min_colname),
-      check_string(glucose_60min_colname),
-      combine = "and")
-    assert(
-      ifelse(cpeptide_fasting_colname %in% colnames(input_data),
-             TRUE,
-             "cpeptide_fasting_colname not found in input_data"),
-      ifelse(cpeptide_60min_colname %in% colnames(input_data),
-             TRUE,
-             "cpeptide_60min_colname not found in input_data"),
-      ifelse(glucose_60min_colname %in% colnames(input_data),
-             TRUE,
-             "glucose_60min_colname not found in input_data"),
-      combine = "and")
+    assert_string(cpeptide_fasting_colname)
+    assert_string(cpeptide_60min_colname)
+    assert_string(glucose_60min_colname)
+    assert_names(
+      colnames(input_data),
+      must.include = c(
+        cpeptide_fasting_colname,
+        cpeptide_60min_colname,
+        glucose_60min_colname
+      )
+    )
     assert_numeric(input_data[[cpeptide_fasting_colname]])
     assert_numeric(input_data[[cpeptide_60min_colname]])
     assert_numeric(input_data[[glucose_60min_colname]])
-    
+
     # calculate Index60 values
-    index60 <- 
-      0.3695 * log(input_data[[cpeptide_fasting_colname]]) +
+    index60 <-
+      0.3695 *
+      log(input_data[[cpeptide_fasting_colname]]) +
       0.0165 * input_data[[glucose_60min_colname]] -
       0.3644 * input_data[[cpeptide_60min_colname]]
-    
+
     return(index60)
   }

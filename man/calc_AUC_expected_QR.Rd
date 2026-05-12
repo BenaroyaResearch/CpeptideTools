@@ -5,7 +5,7 @@
 \title{Calculate the expected AUC under the QR model}
 \usage{
 calc_AUC_expected_QR(
-  input_data, timepoint = 12, 
+  input_data, timepoint = 12,
   cpeptide_baseline_colname = "auc_mean", age_colname = "age_years")
 }
 \arguments{
