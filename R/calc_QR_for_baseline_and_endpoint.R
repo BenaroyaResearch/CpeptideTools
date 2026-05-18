@@ -1,10 +1,10 @@
 #' @export
 calc_QR_for_baseline_and_endpoint <- function(data_to_add_QR_values_to,
-                           current_response_time,
-                           baseline_date,
-                           mean_auc_baseline_col,
-                           mean_auc_response_col,
-                           age_at_baseline_col) {
+                                              current_response_time,
+                                              baseline_date,
+                                              mean_auc_baseline_col,
+                                              mean_auc_response_col,
+                                              age_at_baseline_col) {
   
   coef_label <- paste0("baseline: ", baseline_date, " endpoint: ", current_response_time)
   
@@ -20,9 +20,9 @@ calc_QR_for_baseline_and_endpoint <- function(data_to_add_QR_values_to,
   
   newdata <- data_to_add_QR_values_to %>%
     dplyr::transmute(
-      log_mean_AUC_baseline = log({{ mean_auc_baseline_col }} + 1),
-      log_mean_AUC_response = log({{ mean_auc_response_col }} + 1),
-      Age_At_Screening      = {{ age_at_baseline_col }}
+      log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
+      log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
+      Age_At_Screening      = .data[[age_at_baseline_col]]
     )
   
   X           <- model.matrix(~ log_mean_AUC_baseline + Age_At_Screening, data = newdata)
