@@ -1,4 +1,5 @@
 # Making QR prediction intervals
+#' @export
 make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
                                          current_response_time,
                                          baseline_date,
