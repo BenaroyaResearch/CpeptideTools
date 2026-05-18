@@ -1,6 +1,3 @@
-
-# Updating the calc_QR function to work for different baseline and endpoint...
-# ... times.
 #' @export
 calc_QR_for_baseline_and_endpoint <- function(data_to_add_QR_values_to,
                            current_response_time,
