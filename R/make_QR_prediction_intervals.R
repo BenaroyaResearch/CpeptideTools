@@ -1,7 +1,11 @@
 #' @export
+#' @export
 make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
                                          current_response_time,
                                          baseline_date,
+                                         mean_auc_baseline_col,
+                                         mean_auc_response_col,
+                                         age_at_baseline_col,
                                          QR_prediction_levels = c("65", "80", "95"),
                                          groups_to_plot       = c("Active", "Placebo"),
                                          study_label          = NULL,
@@ -48,11 +52,12 @@ make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
   coefs      <- model_info$coef
   sigma_hat  <- model_info$sigma_hat
   
-  # ── Compute fitted placebo values and SE ──────────────────────────────────────
+  # ── Compute fitted placebo values and SE ─────────────────────────────────────
   newdata <- data_to_add_QR_values_to %>%
     dplyr::transmute(
-      log_mean_AUC_baseline = log_baseline_mean_AUC_cpep,
-      Age_At_Screening      = Age_At_Screening
+      log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
+      log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
+      Age_At_Screening      = .data[[age_at_baseline_col]]
     )
   
   X           <- model.matrix(~ log_mean_AUC_baseline + Age_At_Screening, data = newdata)
@@ -60,9 +65,11 @@ make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
   
   QR_dat <- data_to_add_QR_values_to %>%
     dplyr::mutate(
-      lm_placebo_estimates = fitted_vals,
-      lm_estimated_te      = log_response_mean_AUC_cpep - lm_placebo_estimates,
-      lm_estimated_te_se   = sigma_hat
+      log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
+      log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
+      lm_placebo_estimates  = fitted_vals,
+      lm_estimated_te       = log_mean_AUC_response - lm_placebo_estimates,
+      lm_estimated_te_se    = sigma_hat
     )
   
   # ── Optional study filter ─────────────────────────────────────────────────────
