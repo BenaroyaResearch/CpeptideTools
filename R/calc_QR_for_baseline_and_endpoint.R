@@ -30,10 +30,10 @@ calc_QR_for_baseline_and_endpoint <- function(data_to_add_QR_values_to,
   
   data_to_add_QR_values_to %>%
     dplyr::mutate(
-      log_mean_AUC_baseline = log({{ mean_auc_baseline_col }} + 1),
-      log_mean_AUC_response = log({{ mean_auc_response_col }} + 1),
+      log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
+      log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
       lm_placebo_estimates  = fitted_vals,
-      lm_estimated_te       = log_mean_AUC_response - lm_placebo_estimates
+      QR       = log_mean_AUC_response - lm_placebo_estimates
     )
 }
 
