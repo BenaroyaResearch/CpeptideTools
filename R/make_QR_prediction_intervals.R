@@ -1,4 +1,86 @@
+#' Generate quantitative response (QR) prediction interval plots for treated and placebo subjects
+#'
+#' This function computes prediction intervals around each subject's quantitative response (QR)
+#' estimate and generates waterfall plots showing individual-level QR values with uncertainty
+#' bounds. QR measures the difference between a subject's observed log-transformed AUC response
+#' and the trajectory expected under placebo; prediction intervals around this estimate are used
+#' to classify subjects as responders to therapy. Subjects whose entire prediction interval lies
+#' above zero are classified as responders, indicating their response exceeds placebo expectation.
+#' Plots can be stratified by study and prediction interval level, and optionally saved to PDF
+#' or PNG files.
+#'
+#' @param data_to_add_QR_values_to data frame containing subject-level data, including AUC
+#'   values at baseline and the response timepoint, age at baseline, and columns named
+#'   \code{ID}, \code{Study_label}, and \code{Active_versus_Placebo}.
+#' @param current_response_time character, the label of the response/endpoint timepoint used
+#'   to select the correct pre-fitted model (e.g. \code{"12 months"}).
+#' @param baseline_date character, the label of the baseline visit used to select the correct
+#'   pre-fitted model (e.g. \code{"randomization"}).
+#' @param mean_auc_baseline_col character, the name of the column containing mean AUC at baseline.
+#' @param mean_auc_response_col character, the name of the column containing mean AUC at the
+#'   response timepoint.
+#' @param age_at_baseline_col character, the name of the column containing age at baseline.
+#' @param QR_prediction_levels character vector, the prediction interval levels to compute and
+#'   plot. Must be a subset of \code{c("55", "60", "65", "70", "80", "90", "95")}. A subject
+#'   is classified as a responder at a given level if the lower bound of their QR prediction
+#'   interval at that level exceeds zero. Defaults to \code{c("65", "80", "95")}.
+#' @param groups_to_plot character vector, which treatment groups to include in the responder
+#'   count annotation on each plot. Annotation for a group is suppressed if no subjects from
+#'   that group are present in the data. Defaults to \code{c("Active", "Placebo")}.
+#' @param study_label character or NULL, an optional study label to restrict plotting to a
+#'   single study. If NULL (default), plots are generated for all studies in the data.
+#' @param ylim numeric vector of length 2 or NULL, y-axis limits for the plots (e.g.
+#'   \code{c(-0.5, 1)}). If NULL (default), limits are determined automatically.
+#' @param width numeric, width of the output plot in inches. Defaults to 11.
+#' @param height numeric, height of the output plot in inches. Defaults to 8.5.
+#' @param base_size numeric, base font size for the plot theme. Defaults to 14.
+#' @param positive_color character, color used for subjects classified as responders (i.e.
+#'   whose entire QR prediction interval lies above zero). Defaults to \code{"darkred"}.
+#' @param nonpositive_color character, color used for subjects not classified as responders.
+#'   Defaults to \code{"grey70"}.
+#' @param pdf_file character or NULL, file path for saving all plots to a single multi-page
+#'   PDF. If NULL (default), no PDF is saved.
+#' @param png_prefix character or NULL, file path prefix for saving individual plots as PNG
+#'   files. If NULL (default), no PNG files are saved. Files are named using the prefix,
+#'   study label, and prediction interval level.
+#' @param png_units character, units for PNG dimensions, passed to \code{ggplot2::ggsave}.
+#'   Defaults to \code{"in"}.
+#' @param png_dpi numeric, resolution for PNG output in dots per inch. Defaults to 300.
+#' @param show_sd logical, whether to include the placebo model's residual SD in the plot
+#'   annotation. The residual SD is used to construct the prediction intervals. Defaults to TRUE.
+#' @import dplyr
+#' @import ggplot2
+#' @import purrr
+#' @import stringr
+#' @import magrittr
 #' @export
+#' @return invisibly, a named list with three elements: \code{plots} (a named list of
+#'   \code{ggplot} objects, one per study/prediction-level combination), \code{png_files} (a
+#'   character vector of any PNG file paths written), and \code{plot_data} (the long-format
+#'   data frame used for plotting, with one row per subject per prediction interval level,
+#'   including the QR estimate, lower and upper interval bounds, and responder classification).
+#' @usage
+#' make_QR_prediction_intervals(
+#'   data_to_add_QR_values_to,
+#'   current_response_time,
+#'   baseline_date,
+#'   mean_auc_baseline_col,
+#'   mean_auc_response_col,
+#'   age_at_baseline_col,
+#'   QR_prediction_levels = c("65", "80", "95"),
+#'   groups_to_plot       = c("Active", "Placebo"),
+#'   study_label          = NULL,
+#'   ylim                 = NULL,
+#'   width                = 11,
+#'   height               = 8.5,
+#'   base_size            = 14,
+#'   positive_color       = "darkred",
+#'   nonpositive_color    = "grey70",
+#'   pdf_file             = NULL,
+#'   png_prefix           = NULL,
+#'   png_units            = "in",
+#'   png_dpi              = 300,
+#'   show_sd              = TRUE)
 make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
                                          current_response_time,
                                          baseline_date,
@@ -38,35 +120,36 @@ make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
   z_values <- z_values[QR_prediction_levels]
   
   # ── Pull model info from sysdata ─────────────────────────────────────────────
-  coef_label <- paste0("baseline: ", baseline_date, " endpoint: ", current_response_time)
+  model_lookup_key <- paste0("baseline: ", baseline_date, " endpoint: ", current_response_time)
   
-  if (!coef_label %in% names(base_QR_models_minimal)) {
+  if (!model_lookup_key %in% names(base_QR_models_minimal)) {
     stop(paste0(
-      "No model found for '", coef_label, "'.\n",
+      "No model found for '", model_lookup_key, "'.\n",
       "Available models: ", paste(names(base_QR_models_minimal), collapse = "; ")
     ))
   }
   
-  model_info <- base_QR_models_minimal[[coef_label]]
-  coefs      <- model_info$coef
-  sigma_hat  <- model_info$sigma_hat
+  selected_model <- base_QR_models_minimal[[model_lookup_key]]
+  coefs          <- selected_model$coef
+  sigma_hat      <- selected_model$sigma_hat
   
   # ── Compute fitted placebo values and SE ─────────────────────────────────────
-  newdata <- data_to_add_QR_values_to %>%
-    dplyr::transmute(
-      log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
-      log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
-      Age_At_Screening      = .data[[age_at_baseline_col]]
-    )
-  
-  X           <- model.matrix(~ log_mean_AUC_baseline + Age_At_Screening, data = newdata)
-  fitted_vals <- as.numeric(X %*% coefs)
+  design_matrix <- model.matrix(
+    ~ log_mean_AUC_baseline + Age_At_Screening,
+    data = data_to_add_QR_values_to %>%
+      dplyr::transmute(
+        log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
+        log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
+        Age_At_Screening      = .data[[age_at_baseline_col]]
+      )
+  )
+  fitted_placebo_vals <- as.numeric(design_matrix %*% coefs)
   
   QR_dat <- data_to_add_QR_values_to %>%
     dplyr::mutate(
       log_mean_AUC_baseline = log(.data[[mean_auc_baseline_col]] + 1),
       log_mean_AUC_response = log(.data[[mean_auc_response_col]] + 1),
-      lm_placebo_estimates  = fitted_vals,
+      lm_placebo_estimates  = fitted_placebo_vals,
       lm_estimated_te       = log_mean_AUC_response - lm_placebo_estimates,
       lm_estimated_te_se    = sigma_hat
     )
@@ -122,16 +205,16 @@ make_QR_prediction_intervals <- function(data_to_add_QR_values_to,
     if (show_sd) {
       lines <- c(lines, paste0("Residual SD: ", round(sigma_hat, 3)))
     }
-    if ("Placebo" %in% groups_to_plot) {
+    if ("Placebo" %in% groups_to_plot && any(study_dat$Active_versus_Placebo == "Placebo", na.rm = TRUE)) {
       n_tot  <- sum(study_dat$Active_versus_Placebo == "Placebo", na.rm = TRUE)
       n_resp <- sum(study_dat$Active_versus_Placebo == "Placebo" & study_dat$Responder, na.rm = TRUE)
-      pct    <- if (n_tot > 0) round(100 * n_resp / n_tot, 1) else NA
+      pct    <- round(100 * n_resp / n_tot, 1)
       lines  <- c(lines, paste0("Placebos called as responders: ", n_resp, " / ", n_tot, " (", pct, "%)"))
     }
-    if ("Active" %in% groups_to_plot) {
+    if ("Active" %in% groups_to_plot && any(study_dat$Active_versus_Placebo == "Treated", na.rm = TRUE)) {
       n_tot  <- sum(study_dat$Active_versus_Placebo == "Treated", na.rm = TRUE)
       n_resp <- sum(study_dat$Active_versus_Placebo == "Treated" & study_dat$Responder, na.rm = TRUE)
-      pct    <- if (n_tot > 0) round(100 * n_resp / n_tot, 1) else NA
+      pct    <- round(100 * n_resp / n_tot, 1)
       lines  <- c(lines, paste0("Treatment group responders: ", n_resp, " / ", n_tot, " (", pct, "%)"))
     }
     paste(lines, collapse = "\n")
