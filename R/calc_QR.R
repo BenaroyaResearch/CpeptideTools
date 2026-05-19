@@ -64,3 +64,4 @@ calc_QR <-
 
     return(qr)
   }
+
